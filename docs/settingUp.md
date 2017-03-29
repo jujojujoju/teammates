@@ -12,7 +12,7 @@ The instructions in all parts of this document work for Linux, OS X, and Windows
 
 ## Step 1: Install necessary tools and languages
 
-1. Install Git, and (optional but recommended) a Git GUI client such as GitHub for Windows/Mac.
+1. Install Source Tree or other similar Git Client, or at least Git.
 1. Install JDK 1.7.
 1. Install Node.js (minimum version 4.x).
 
@@ -138,9 +138,10 @@ More information can be found at [this documentation](https://help.github.com/ar
 If you followed every step correctly, you should have successfully set up the development environment.
 You may proceed to the development routine as lined out in [this document](development.md).
 
-## Step 5: (Optional) Set up static analysis tools
+## Step 5: (Optional) Set up static analysis tools for your IDE
 
 TEAMMATES uses a number of static analysis tools in order to maintain code quality and measure code coverage.
-It is highly encouraged to set up these tools in your local development environment.
 
-Refer to [this document](staticAnalysis.md) for details on the tools used, how to set them up, and how to run them locally.
+If you use our supported IDEs, we have provided [a guide on how to set up the tools used in those IDEs](staticAnalysis.md).
+
+If you do not wish to install those tools in your IDE, you can run all static analysis tools via command line.
