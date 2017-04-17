@@ -6,35 +6,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import teammates.common.datatransfer.attributes.AccountAttributes;
-import teammates.common.datatransfer.attributes.AdminEmailAttributes;
-import teammates.common.datatransfer.attributes.CommentAttributes;
+import com.google.appengine.api.blobstore.BlobKey;
+
 import teammates.common.datatransfer.CommentParticipantType;
 import teammates.common.datatransfer.CommentSearchResultBundle;
 import teammates.common.datatransfer.CommentSendingState;
-import teammates.common.datatransfer.attributes.CourseAttributes;
 import teammates.common.datatransfer.CourseDetailsBundle;
 import teammates.common.datatransfer.CourseEnrollmentResult;
 import teammates.common.datatransfer.CourseRoster;
 import teammates.common.datatransfer.CourseSummaryBundle;
-import teammates.common.datatransfer.attributes.FeedbackQuestionAttributes;
-import teammates.common.datatransfer.attributes.FeedbackResponseAttributes;
-import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
 import teammates.common.datatransfer.FeedbackResponseCommentSearchResultBundle;
-import teammates.common.datatransfer.attributes.FeedbackSessionAttributes;
 import teammates.common.datatransfer.FeedbackSessionDetailsBundle;
 import teammates.common.datatransfer.FeedbackSessionQuestionsBundle;
 import teammates.common.datatransfer.FeedbackSessionResponseStatus;
 import teammates.common.datatransfer.FeedbackSessionResultsBundle;
-import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.datatransfer.InstructorPrivileges;
 import teammates.common.datatransfer.InstructorSearchResultBundle;
 import teammates.common.datatransfer.SectionDetailsBundle;
-import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.datatransfer.StudentEnrollDetails;
-import teammates.common.datatransfer.attributes.StudentProfileAttributes;
 import teammates.common.datatransfer.StudentSearchResultBundle;
 import teammates.common.datatransfer.TeamDetailsBundle;
+import teammates.common.datatransfer.attributes.AccountAttributes;
+import teammates.common.datatransfer.attributes.AdminEmailAttributes;
+import teammates.common.datatransfer.attributes.CommentAttributes;
+import teammates.common.datatransfer.attributes.CourseAttributes;
+import teammates.common.datatransfer.attributes.FeedbackQuestionAttributes;
+import teammates.common.datatransfer.attributes.FeedbackResponseAttributes;
+import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
+import teammates.common.datatransfer.attributes.FeedbackSessionAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
+import teammates.common.datatransfer.attributes.StudentProfileAttributes;
 import teammates.common.exception.EnrollException;
 import teammates.common.exception.EntityAlreadyExistsException;
 import teammates.common.exception.EntityDoesNotExistException;
@@ -55,8 +57,6 @@ import teammates.logic.core.FeedbackSessionsLogic;
 import teammates.logic.core.InstructorsLogic;
 import teammates.logic.core.ProfilesLogic;
 import teammates.logic.core.StudentsLogic;
-
-import com.google.appengine.api.blobstore.BlobKey;
 
 /**
  * Provides the business logic for production usage of the system.
@@ -295,6 +295,15 @@ public class Logic {
      */
     public void putDocument(InstructorAttributes instructor) {
         instructorsLogic.putDocument(instructor);
+    }
+
+    /**
+     * Batch creates or updates documents for the given Instructors.
+     *
+     * @see InstructorsLogic#putDocuments(List)
+     */
+    public void putInstructorDocuments(List<InstructorAttributes> instructors) {
+        instructorsLogic.putDocuments(instructors);
     }
 
     /**
@@ -1079,6 +1088,13 @@ public class Logic {
 
     public void putDocument(StudentAttributes student) {
         studentsLogic.putDocument(student);
+    }
+
+    /**
+     * Batch creates or updates search documents for the given students.
+     */
+    public void putStudentDocuments(List<StudentAttributes> students) {
+        studentsLogic.putDocuments(students);
     }
 
     /**
@@ -1983,6 +1999,15 @@ public class Logic {
     }
 
     /**
+     * Batch creates or updates documents for the given comments.
+     *
+     * @see FeedbackResponseCommentsLogic#putDocuments(List)
+     */
+    public void putFeedbackResponseCommentDocuments(List<FeedbackResponseCommentAttributes> comments) {
+        feedbackResponseCommentsLogic.putDocuments(comments);
+    }
+
+    /**
      * Removes document for the given comment.
      *
      * @see FeedbackResponseCommentsLogic#deleteDocument(FeedbackResponseCommentAttributes)
@@ -2071,6 +2096,15 @@ public class Logic {
      */
     public void putDocument(CommentAttributes comment) {
         commentsLogic.putDocument(comment);
+    }
+
+    /**
+     * Batch creates or updates documents for comments.
+     *
+     * @see CommentsLogic#putDocuments(List)
+     */
+    public void putCommentDocuments(List<CommentAttributes> comments) {
+        commentsLogic.putDocuments(comments);
     }
 
     /**

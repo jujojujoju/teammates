@@ -10,10 +10,13 @@ import java.util.Map;
 import javax.jdo.JDOHelper;
 import javax.jdo.Query;
 
+import com.google.appengine.api.search.Results;
+import com.google.appengine.api.search.ScoredDocument;
+
+import teammates.common.datatransfer.StudentSearchResultBundle;
 import teammates.common.datatransfer.attributes.EntityAttributes;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.datatransfer.attributes.StudentAttributes;
-import teammates.common.datatransfer.StudentSearchResultBundle;
 import teammates.common.exception.EntityAlreadyExistsException;
 import teammates.common.exception.EntityDoesNotExistException;
 import teammates.common.exception.InvalidParametersException;
@@ -25,11 +28,9 @@ import teammates.common.util.Logger;
 import teammates.common.util.StringHelper;
 import teammates.common.util.ThreadHelper;
 import teammates.storage.entity.CourseStudent;
+import teammates.storage.search.SearchDocument;
 import teammates.storage.search.StudentSearchDocument;
 import teammates.storage.search.StudentSearchQuery;
-
-import com.google.appengine.api.search.Results;
-import com.google.appengine.api.search.ScoredDocument;
 
 /**
  * Handles CRUD operations for students.
@@ -45,6 +46,17 @@ public class StudentsDb extends EntitiesDb {
 
     public void putDocument(StudentAttributes student) {
         putDocument(Const.SearchIndex.STUDENT, new StudentSearchDocument(student));
+    }
+
+    /**
+     * Batch creates or updates search documents for the given students.
+     */
+    public void putDocuments(List<StudentAttributes> students) {
+        List<SearchDocument> studentDocuments = new ArrayList<SearchDocument>();
+        for (StudentAttributes student : students) {
+            studentDocuments.add(new StudentSearchDocument(student));
+        }
+        putDocuments(Const.SearchIndex.STUDENT, studentDocuments);
     }
 
     /**
@@ -64,7 +76,7 @@ public class StudentsDb extends EntitiesDb {
 
     /**
      * This method should be used by admin only since the searching does not restrict the
-     * visibility according to the logged-in user's google ID. This is used by amdin to
+     * visibility according to the logged-in user's google ID. This is used by admin to
      * search students in the whole system.
      * @return null if no result found
      */

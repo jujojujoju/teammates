@@ -10,10 +10,13 @@ import java.util.Map;
 import javax.jdo.JDOHelper;
 import javax.jdo.Query;
 
+import com.google.appengine.api.search.Results;
+import com.google.appengine.api.search.ScoredDocument;
+
 import teammates.common.datatransfer.CommentSendingState;
+import teammates.common.datatransfer.FeedbackResponseCommentSearchResultBundle;
 import teammates.common.datatransfer.attributes.EntityAttributes;
 import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
-import teammates.common.datatransfer.FeedbackResponseCommentSearchResultBundle;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.exception.EntityAlreadyExistsException;
 import teammates.common.exception.EntityDoesNotExistException;
@@ -24,9 +27,7 @@ import teammates.common.util.Logger;
 import teammates.storage.entity.FeedbackResponseComment;
 import teammates.storage.search.FeedbackResponseCommentSearchDocument;
 import teammates.storage.search.FeedbackResponseCommentSearchQuery;
-
-import com.google.appengine.api.search.Results;
-import com.google.appengine.api.search.ScoredDocument;
+import teammates.storage.search.SearchDocument;
 
 /**
  * Handles CRUD operations for feedback response comments.
@@ -424,6 +425,17 @@ public class FeedbackResponseCommentsDb extends EntitiesDb {
      */
     public void putDocument(FeedbackResponseCommentAttributes comment) {
         putDocument(Const.SearchIndex.FEEDBACK_RESPONSE_COMMENT, new FeedbackResponseCommentSearchDocument(comment));
+    }
+
+    /*
+     * Batch creates or updates search documents for the given comments
+     */
+    public void putDocuments(List<FeedbackResponseCommentAttributes> comments) {
+        List<SearchDocument> frcSearchDocuments = new ArrayList<SearchDocument>();
+        for (FeedbackResponseCommentAttributes comment : comments) {
+            frcSearchDocuments.add(new FeedbackResponseCommentSearchDocument(comment));
+        }
+        putDocuments(Const.SearchIndex.FEEDBACK_RESPONSE_COMMENT, frcSearchDocuments);
     }
 
     /**

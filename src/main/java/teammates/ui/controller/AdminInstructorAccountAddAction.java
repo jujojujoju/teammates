@@ -6,8 +6,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import teammates.common.datatransfer.attributes.CommentAttributes;
 import teammates.common.datatransfer.DataBundle;
+import teammates.common.datatransfer.attributes.CommentAttributes;
 import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.datatransfer.attributes.StudentAttributes;
@@ -207,18 +207,10 @@ public class AdminInstructorAccountAddAction extends Action {
         List<StudentAttributes> students = logic.getStudentsForCourse(courseId);
         List<InstructorAttributes> instructors = logic.getInstructorsForCourse(courseId);
 
-        for (CommentAttributes comment : comments) {
-            logic.putDocument(comment);
-        }
-        for (FeedbackResponseCommentAttributes comment : frComments) {
-            logic.putDocument(comment);
-        }
-        for (StudentAttributes student : students) {
-            logic.putDocument(student);
-        }
-        for (InstructorAttributes instructor : instructors) {
-            logic.putDocument(instructor);
-        }
+        logic.putCommentDocuments(comments);
+        logic.putFeedbackResponseCommentDocuments(frComments);
+        logic.putStudentDocuments(students);
+        logic.putInstructorDocuments(instructors);
 
         return courseId;
     }
