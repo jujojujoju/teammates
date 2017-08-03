@@ -456,7 +456,7 @@ public class AdminActivityLogPageActionTest extends BaseActionTest {
     }
 
     private List<String> generateExpectedMsgFrom(int[][] expectedLogs) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (int i = 0; i < expectedLogs.length; i++) {
             for (int j = 0; j < expectedLogs[i].length; j++) {
                 result.add(logMessages.get(i).get(expectedLogs[i][j]));
@@ -506,12 +506,12 @@ public class AdminActivityLogPageActionTest extends BaseActionTest {
     private void verifyLogsIdInRange(List<ActivityLogEntry> actualLogs, int first, int last) {
         assertEquals(last - first + 1, actualLogs.size());
         for (int i = 0; i < actualLogs.size(); i++) {
-            assertEquals(String.format("id4%02d", first + i), actualLogs.get(i).getId());
+            assertEquals(String.format("id4%02d", first + i), actualLogs.get(i).getLogId());
         }
     }
 
     private List<ActivityLogEntry> getLogsFromLogTemplateRows(List<AdminActivityLogTableRow> rows) {
-        List<ActivityLogEntry> logs = new ArrayList<ActivityLogEntry>();
+        List<ActivityLogEntry> logs = new ArrayList<>();
         for (AdminActivityLogTableRow row : rows) {
             logs.add(row.getLogEntry());
         }
@@ -565,6 +565,13 @@ public class AdminActivityLogPageActionTest extends BaseActionTest {
     @Override
     protected AdminActivityLogPageAction getAction(String... params) {
         return (AdminActivityLogPageAction) gaeSimulation.getActionObject(getActionUri(), params);
+    }
+
+    @Override
+    @Test
+    protected void testAccessControl() throws Exception {
+        String[] submissionParams = new String[]{};
+        verifyOnlyAdminsCanAccess(submissionParams);
     }
 
 }

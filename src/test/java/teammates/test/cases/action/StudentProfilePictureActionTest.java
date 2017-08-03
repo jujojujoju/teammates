@@ -168,8 +168,10 @@ public class StudentProfilePictureActionTest extends BaseActionTest {
         String course = dataBundle.courses.get("unregisteredCourse").getId();
         AccountsLogic.inst().createAccount(new AccountAttributes("unregInsId", "unregName", true,
                                                                  "unregIns@unregcourse.com", "unregInstitute"));
-        InstructorAttributes instructor = new InstructorAttributes("unregInsId", course, "unregName",
-                                                                   "unregIns@unregcourse.com");
+        InstructorAttributes instructor = InstructorAttributes
+                .builder("unregInsId", course, "unregName", "unregIns@unregcourse.com")
+                .build();
+
         InstructorsLogic.inst().createInstructor(instructor);
         return instructor;
     }
@@ -325,12 +327,17 @@ public class StudentProfilePictureActionTest extends BaseActionTest {
                                   + "|||true|||Student" + (isMasquerade ? "(M)" : "") + "|||"
                                   + account.name + "|||" + account.googleId + "|||" + student.email
                                   + "|||Requested Profile Picture by student directly|||/page/studentProfilePic";
-        AssertHelper.assertLogMessageEquals(expectedLogMessage, actualLogMessage);
+        AssertHelper.assertLogMessageEqualsIgnoreLogId(expectedLogMessage, actualLogMessage);
     }
 
     @Override
     protected StudentProfilePictureAction getAction(String... params) {
         return (StudentProfilePictureAction) gaeSimulation.getActionObject(getActionUri(), params);
+    }
+
+    @Override
+    protected void testAccessControl() throws Exception {
+        //TODO: implement this
     }
 
 }

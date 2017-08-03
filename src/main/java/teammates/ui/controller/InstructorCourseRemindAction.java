@@ -26,7 +26,7 @@ public class InstructorCourseRemindAction extends Action {
     public ActionResult execute() throws EntityDoesNotExistException {
 
         String courseId = getRequestParamValue(Const.ParamsNames.COURSE_ID);
-        Assumption.assertNotNull(courseId);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.COURSE_ID, courseId);
 
         CourseAttributes course = logic.getCourse(courseId);
         if (course == null) {
@@ -53,7 +53,7 @@ public class InstructorCourseRemindAction extends Action {
         }
 
         /* Process sending emails and setup status to be shown to user and admin */
-        Map<String, JoinEmailData> emailDataMap = new TreeMap<String, JoinEmailData>();
+        Map<String, JoinEmailData> emailDataMap = new TreeMap<>();
 
         String redirectUrl = "";
         if (isSendingToStudent) {

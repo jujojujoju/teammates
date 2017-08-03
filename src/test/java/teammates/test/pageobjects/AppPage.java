@@ -15,8 +15,8 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.remote.UselessFileDetector;
@@ -27,8 +27,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import teammates.common.util.Const;
 import teammates.common.util.ThreadHelper;
 import teammates.common.util.Url;
+import teammates.common.util.retry.MaximumRetriesExceededException;
+import teammates.common.util.retry.RetryManager;
+import teammates.common.util.retry.RetryableTask;
+import teammates.common.util.retry.RetryableTaskReturnsThrows;
 import teammates.test.driver.AssertHelper;
 import teammates.test.driver.FileHelper;
 import teammates.test.driver.HtmlHelper;
@@ -51,6 +56,12 @@ public abstract class AppPage {
     /** Browser instance the page is loaded into. */
     protected Browser browser;
 
+    /** Use for retrying due to persistence delays. */
+    protected RetryManager persistenceRetryManager = new RetryManager(TestProperties.PERSISTENCE_RETRY_PERIOD_IN_S / 2);
+
+    /** Use for retrying due to transient UI issues. */
+    protected RetryManager uiRetryManager = new RetryManager((TestProperties.TEST_TIMEOUT + 1) / 2);
+
     // These are elements common to most pages in our app
 
     @FindBy(id = "statusMessagesToUser")
@@ -65,10 +76,7 @@ public abstract class AppPage {
     @FindBy(xpath = "//*[@id=\"contentLinks\"]/ul[1]/li[4]/a")
     private WebElement instructorStudentsTab;
 
-    @FindBy(xpath = "//*[@id=\"contentLinks\"]/ul[1]/li[5]/a")
-    private WebElement instructorCommentsTab;
-
-    @FindBy(xpath = "//*[@id=\"contentLinks\"]/ul[1]/li[7]/a")
+    @FindBy(xpath = "//*[@id=\"contentLinks\"]/ul[1]/li[6]/a")
     private WebElement instructorHelpTab;
 
     @FindBy(id = "studentHomeNavLink")
@@ -76,9 +84,6 @@ public abstract class AppPage {
 
     @FindBy(id = "studentProfileNavLink")
     private WebElement studentProfileTab;
-
-    @FindBy(id = "studentCommentsNavLink")
-    private WebElement studentCommentsTab;
 
     @FindBy(id = "studentHelpLink")
     private WebElement studentHelpTab;
@@ -173,6 +178,19 @@ public abstract class AppPage {
     }
 
     /**
+     * Checks whether the URL currently loaded in the browser corresponds to the given page {@code uri}.
+     */
+    public boolean isPageUri(String uri) {
+        Url currentPageUrl;
+        try {
+            currentPageUrl = new Url(browser.driver.getCurrentUrl());
+        } catch (AssertionError e) { // due to MalformedURLException
+            return false;
+        }
+        return currentPageUrl.getRelativeUrl().equals(uri);
+    }
+
+    /**
      * Waits until the page is fully loaded.
      */
     public void waitForPageToLoad() {
@@ -217,6 +235,11 @@ public abstract class AppPage {
     public void waitForElementVisibility(WebElement element) {
         WebDriverWait wait = new WebDriverWait(browser.driver, TestProperties.TEST_TIMEOUT);
         wait.until(ExpectedConditions.visibilityOf(element));
+    }
+
+    public void waitForElementVisibility(By by) {
+        WebDriverWait wait = new WebDriverWait(browser.driver, TestProperties.TEST_TIMEOUT);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(by));
     }
 
     public void waitForElementToBeClickable(WebElement element) {
@@ -298,9 +321,14 @@ public abstract class AppPage {
         waitForElementToBeClickable(closeButton);
     }
 
-    private void waitForModalToDisappear() {
+    public void waitForModalToDisappear() {
         By modalBackdrop = By.className("modal-backdrop");
         waitForElementToDisappear(modalBackdrop);
+    }
+
+    public void waitForRemindModalPresence() {
+        By modalBackdrop = By.className("modal-backdrop");
+        waitForElementPresence(modalBackdrop);
     }
 
     /**
@@ -400,16 +428,6 @@ public abstract class AppPage {
     }
 
     /**
-     * Equivalent to clicking the 'Comments' tab on the top menu of the page.
-     * @return the loaded page.
-     */
-    public InstructorCommentsPage loadInstructorCommentsTab() {
-        click(instructorCommentsTab);
-        waitForPageToLoad();
-        return changePageType(InstructorCommentsPage.class);
-    }
-
-    /**
      * Equivalent of clicking the 'Profile' tab on the top menu of the page.
      * @return the loaded page
      */
@@ -427,16 +445,6 @@ public abstract class AppPage {
         click(studentHomeTab);
         waitForPageToLoad();
         return changePageType(StudentHomePage.class);
-    }
-
-    /**
-     * Equivalent of student clicking the 'Comments' tab on the top menu of the page.
-     * @return the loaded page
-     */
-    public StudentCommentsPage loadStudentCommentsTab() {
-        click(studentCommentsTab);
-        waitForPageToLoad();
-        return changePageType(StudentCommentsPage.class);
     }
 
     /**
@@ -640,6 +648,11 @@ public abstract class AppPage {
     public String getDataTableId(int tableNum) {
         WebElement tableElement = browser.driver.findElements(By.className("table")).get(tableNum);
         return tableElement.getAttribute("id");
+    }
+
+    public void clickElementById(String elementId) {
+        WebElement element = browser.driver.findElement(By.id(elementId));
+        click(element);
     }
 
     /**
@@ -869,8 +882,7 @@ public abstract class AppPage {
     }
 
     private boolean testAndRunGodMode(String filePath, String content, boolean isPart) throws IOException {
-        return Boolean.parseBoolean(System.getProperty("godmode"))
-                && regenerateHtmlFile(filePath, content, isPart);
+        return TestProperties.IS_GODMODE_ENABLED && regenerateHtmlFile(filePath, content, isPart);
     }
 
     private boolean regenerateHtmlFile(String filePath, String content, boolean isPart) throws IOException {
@@ -898,6 +910,22 @@ public abstract class AppPage {
         return verifyHtmlPart(MAIN_CONTENT, filePath);
     }
 
+    public AppPage verifyHtmlMainContentWithReloadRetry(final String filePath)
+            throws IOException, MaximumRetriesExceededException {
+        return persistenceRetryManager.runUntilNoRecognizedException(new RetryableTaskReturnsThrows<AppPage, IOException>(
+                "HTML verification") {
+            @Override
+            public AppPage run() throws IOException {
+                return verifyHtmlPart(MAIN_CONTENT, filePath);
+            }
+
+            @Override
+            public void beforeRetry() {
+                reloadPage();
+            }
+        }, AssertionError.class);
+    }
+
     /**
      * Verifies that the title of the loaded page is the same as {@code expectedTitle}.
      */
@@ -914,36 +942,28 @@ public abstract class AppPage {
         return this;
     }
 
+    public void verifyContainsElement(By by) {
+        List<WebElement> elements = browser.driver.findElements(by);
+        assertFalse(elements.isEmpty());
+    }
+
     /**
      * Verifies the status message in the page is same as the one specified.
-     * @return The page (for chaining method calls).
+     * The check is done multiple times with waiting times in between to account for
+     * timing issues due to page load, inconsistencies in Selenium API, etc.
      */
-    public AppPage verifyStatus(String expectedStatus) {
-
-        // The check is done multiple times with waiting times in between to account for
-        // timing issues due to page load, inconsistencies in Selenium API, etc.
-        for (int i = 0; i < VERIFICATION_RETRY_COUNT; i++) {
-            if (i == VERIFICATION_RETRY_COUNT - 1) {
-                // Last retry count: do one last attempt and if it still fails,
-                // throw assertion error and show the difference
-                waitForElementVisibility(statusMessage);
-                assertEquals(expectedStatus, getStatus());
-                break;
-            }
-            try {
-                waitForElementVisibility(statusMessage);
-                if (expectedStatus.equals(getStatus())) {
-                    break;
+    public void verifyStatus(final String expectedStatus) {
+        try {
+            uiRetryManager.runUntilNoRecognizedException(new RetryableTask("Verify status to user") {
+                @Override
+                public void run() {
+                    waitForElementVisibility(statusMessage);
+                    assertEquals(expectedStatus, getStatus());
                 }
-            } catch (NoSuchElementException | StaleElementReferenceException e) {
-                // Might occur if the page reloads, which makes the previous WebElement
-                // stored in the variable statusMessage "stale"
-                ThreadHelper.waitFor(0);
-            }
-            ThreadHelper.waitFor(VERIFICATION_RETRY_DELAY_IN_MS);
+            }, WebDriverException.class, AssertionError.class);
+        } catch (MaximumRetriesExceededException e) {
+            assertEquals(expectedStatus, getStatus());
         }
-
-        return this;
     }
 
     /**
@@ -985,6 +1005,22 @@ public abstract class AppPage {
         }
     }
 
+    public void verifyImageUrl(String urlRegex, String imgSrc) {
+        if (Const.SystemParams.DEFAULT_PROFILE_PICTURE_PATH.equals(urlRegex)) {
+            verifyDefaultImageUrl(imgSrc);
+        } else {
+            AssertHelper.assertContainsRegex(urlRegex, imgSrc);
+        }
+    }
+
+    public void verifyDefaultImageUrl(String imgSrc) {
+        openNewWindow(imgSrc);
+        switchToNewWindow();
+        assertEquals(TestProperties.TEAMMATES_URL + Const.SystemParams.DEFAULT_PROFILE_PICTURE_PATH,
+                browser.driver.getCurrentUrl());
+        browser.closeCurrentWindowAndSwitchToParentWindow();
+    }
+
     public void changeToMobileView() {
         browser.driver.manage().window().setSize(new Dimension(360, 640));
     }
@@ -999,5 +1035,9 @@ public abstract class AppPage {
     public boolean isElementInViewport(String id) {
         String script = "return isWithinView(document.getElementById('" + id + "'));";
         return (boolean) executeScript(script);
+    }
+
+    private void openNewWindow(String url) {
+        executeScript("$(window.open('" + url + "'))");
     }
 }

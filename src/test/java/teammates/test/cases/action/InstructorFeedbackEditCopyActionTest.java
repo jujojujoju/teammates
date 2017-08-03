@@ -268,7 +268,7 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
 
         assertEquals("", editCopyData.redirectUrl);
 
-        expectedString = "\"\" is not acceptable to TEAMMATES as a/an feedback session name because it is empty. "
+        expectedString = "The field 'feedback session name' is empty. "
                          + "The value of a/an feedback session name should be no longer than 38 characters. "
                          + "It should not be empty.";
         assertEquals(expectedString, editCopyData.errorMessage);
@@ -276,8 +276,8 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
         expectedString =
                 "TEAMMATESLOG|||instructorFeedbackEditCopy|||instructorFeedbackEditCopy|||true|||"
                 + "Instructor|||Instructor 2|||FeedbackEditCopyinstructor2|||tmms.instr@gmail.tmt|||"
-                + "Servlet Action Failure : \"\" is not acceptable to TEAMMATES as a/an feedback session name "
-                + "because it is empty. The value of a/an feedback session name should be no longer than 38 characters. "
+                + "Servlet Action Failure : The field 'feedback session name' is empty. The value of "
+                + "a/an feedback session name should be no longer than 38 characters. "
                 + "It should not be empty.|||/page/instructorFeedbackEditCopy";
         AssertHelper.assertLogMessageEquals(expectedString, a.getLogMessage());
 
@@ -297,7 +297,7 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
 
         assertEquals("", editCopyData.redirectUrl);
 
-        expectedString = "\"\" is not acceptable to TEAMMATES as a/an feedback session name because it is empty. "
+        expectedString = "The field 'feedback session name' is empty. "
                          + "The value of a/an feedback session name should be no longer than 38 characters. "
                          + "It should not be empty.";
         assertEquals(expectedString, editCopyData.errorMessage);
@@ -305,8 +305,8 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
         expectedString =
                 "TEAMMATESLOG|||instructorFeedbackEditCopy|||instructorFeedbackEditCopy|||true|||"
                 + "Instructor|||Instructor 2|||FeedbackEditCopyinstructor2|||tmms.instr@gmail.tmt|||"
-                + "Servlet Action Failure : \"\" is not acceptable to TEAMMATES as a/an feedback session name "
-                + "because it is empty. The value of a/an feedback session name should be no longer than 38 characters. "
+                + "Servlet Action Failure : The field 'feedback session name' is empty. The value of "
+                + "a/an feedback session name should be no longer than 38 characters. "
                 + "It should not be empty.|||/page/instructorFeedbackEditCopy";
         AssertHelper.assertLogMessageEquals(expectedString, a.getLogMessage());
 
@@ -326,7 +326,7 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
 
         assertEquals("", editCopyData.redirectUrl);
 
-        expectedString = "\"\" is not acceptable to TEAMMATES as a/an feedback session name because it is empty. "
+        expectedString = "The field 'feedback session name' is empty. "
                          + "The value of a/an feedback session name should be no longer than 38 characters. "
                          + "It should not be empty.";
         assertEquals(expectedString, editCopyData.errorMessage);
@@ -334,8 +334,8 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
         expectedString =
                 "TEAMMATESLOG|||instructorFeedbackEditCopy|||instructorFeedbackEditCopy|||true|||"
                 + "Instructor|||Instructor 2|||FeedbackEditCopyinstructor2|||tmms.instr@gmail.tmt|||"
-                + "Servlet Action Failure : \"\" is not acceptable to TEAMMATES as a/an feedback session name "
-                + "because it is empty. The value of a/an feedback session name should be no longer than 38 characters. "
+                + "Servlet Action Failure : The field 'feedback session name' is empty. The value of "
+                + "a/an feedback session name should be no longer than 38 characters. "
                 + "It should not be empty.|||/page/instructorFeedbackEditCopy";
         AssertHelper.assertLogMessageEquals(expectedString, a.getLogMessage());
 
@@ -355,7 +355,7 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
 
         assertEquals("", editCopyData.redirectUrl);
 
-        expectedString = "\"\" is not acceptable to TEAMMATES as a/an feedback session name because it is empty. "
+        expectedString = "The field 'feedback session name' is empty. "
                          + "The value of a/an feedback session name should be no longer than 38 characters. "
                          + "It should not be empty.";
         assertEquals(expectedString, editCopyData.errorMessage);
@@ -363,8 +363,8 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
         expectedString =
                 "TEAMMATESLOG|||instructorFeedbackEditCopy|||instructorFeedbackEditCopy|||true|||"
                 + "Instructor|||Instructor 2|||FeedbackEditCopyinstructor2|||tmms.instr@gmail.tmt|||"
-                + "Servlet Action Failure : \"\" is not acceptable to TEAMMATES as a/an feedback session name "
-                + "because it is empty. The value of a/an feedback session name should be no longer than 38 characters. "
+                + "Servlet Action Failure : The field 'feedback session name' is empty. The value of "
+                + "a/an feedback session name should be no longer than 38 characters. "
                 + "It should not be empty.|||/page/instructorFeedbackEditCopy";
         AssertHelper.assertLogMessageEquals(expectedString, a.getLogMessage());
 
@@ -384,8 +384,8 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
         ajaxResult = getAjaxResult(a);
         editCopyData = (InstructorFeedbackEditCopyData) ajaxResult.data;
 
-        expectedString = Const.ActionURIs.INSTRUCTOR_FEEDBACKS_PAGE
-                         + "?error=false&user=" + instructor.googleId;
+        expectedString = getPageResultDestination(
+                                 Const.ActionURIs.INSTRUCTOR_FEEDBACK_SESSIONS_PAGE, false, instructor.googleId);
         assertEquals(expectedString, editCopyData.redirectUrl);
 
         expectedString = "TEAMMATESLOG|||instructorFeedbackEditCopy|||instructorFeedbackEditCopy|||"
@@ -408,5 +408,11 @@ public class InstructorFeedbackEditCopyActionTest extends BaseActionTest {
     @Override
     protected InstructorFeedbackEditCopyAction getAction(String... params) {
         return (InstructorFeedbackEditCopyAction) gaeSimulation.getActionObject(getActionUri(), params);
+    }
+
+    @Override
+    @Test
+    protected void testAccessControl() throws Exception {
+        //TODO: implement this
     }
 }

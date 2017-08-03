@@ -68,13 +68,12 @@
                   <input name="fsname" type="hidden" value="First Session">
                   <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
                   <input name="sectionname" type="hidden" value="All">
-                  <input id="filterTextForDownload" name="filtertext" type="hidden">
                   <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="false">
                   <input name="frindicatemissingresponses" type="hidden" value="false">
                 </form>
                 <br>
                 <div>
-                  <a class="btn btn-primary btn-block btn-tm-actions session-unpublish-for-test" data-fsname="First Session" data-original-title="Make responses no longer visible" data-placement="top" data-sending-published-email="true" data-toggle="tooltip" disabled="" href="/page/instructorFeedbackUnpublish?courseid=CFResultsUiT.CS2104&fsname=First+Session&next=%2Fpage%2FinstructorFeedbacksPage&user=CFResultsUiT.helper2" title="">
+                  <a class="btn btn-primary btn-block session-unpublish-for-test" data-fsname="First Session" data-original-title="Make responses no longer visible" data-placement="top" data-sending-published-email="true" data-toggle="tooltip" disabled="" href="/page/instructorFeedbackUnpublish?courseid=CFResultsUiT.CS2104&fsname=First+Session&next=%2Fpage%2FinstructorFeedbackSessionsPage&user=CFResultsUiT.helper2&token=${sessionToken}" title="">
                     Unpublish Results
                   </a>
                 </div>
@@ -91,8 +90,8 @@
         <div class="row">
           <span class="help-block align-center">
             Non-English characters not displayed properly in the downloaded file?
-            <span class="btn-link" data-target="#fsResultsTableWindow" data-toggle="modal" onclick="submitFormAjax()">
-              click here
+            <span class="btn-link" data-target="#fsResultsTableWindow" data-toggle="modal" id="btn-display-table">
+              Click here.
             </span>
           </span>
         </div>
@@ -125,7 +124,7 @@
           <button class="btn btn-default" data-dismiss="modal" type="button">
             Close
           </button>
-          <button class="btn btn-primary" onclick="selectElementContents(document.getElementById('fsModalTable'));" type="button">
+          <button class="btn btn-primary" id="btn-select-element-contents" type="button">
             Select Table
           </button>
         </div>
@@ -143,123 +142,190 @@
       </div>
     </div>
   </div>
-  <form action="/page/instructorFeedbackResultsPage?courseid=CFResultsUiT.CS2104&fsname=First+Session&user=CFResultsUiT.helper2" class="form-horizontal" method="post" role="form">
-    <div class="panel panel-info margin-0">
-      <div class="panel-body">
-        <div class="row">
-          <div class="col-sm-12 col-md-5">
-            <div class="form-group">
-              <label class="col-sm-2 control-label" for="viewSelect">
+  <div style="margin-bottom: 10px">
+    <div class="well well-plain">
+      <div class="row">
+        <div class="col-md-5">
+          <div data-original-title="View results in different formats" data-toggle="tooltip" title="">
+            <div class="row">
+              <label class="col-md-offset-1 col-md-3">
                 View:
               </label>
-              <div class="col-sm-10" data-original-title="View results in different formats" data-toggle="tooltip" title="">
-                <select class="form-control" id="viewSelect" name="frsorttype" onchange="this.form.submit()">
-                  <option selected="" value="question">
-                    Group by - Question
-                  </option>
-                  <option value="giver-recipient-question">
-                    Group by - Giver &gt; Recipient &gt; Question
-                  </option>
-                  <option value="recipient-giver-question">
-                    Group by - Recipient &gt; Giver &gt; Question
-                  </option>
-                  <option value="giver-question-recipient">
-                    Group by - Giver &gt; Question &gt; Recipient
-                  </option>
-                  <option value="recipient-question-giver">
-                    Group by - Recipient &gt; Question &gt; Giver
-                  </option>
-                </select>
+              <div class="col-md-8">
+                Group by - Question
               </div>
             </div>
           </div>
-          <div class="col-sm-12 col-md-5">
-            <div class="form-group">
-              <label class="col-sm-2 control-label" for="viewSelect">
-                Filter:
+          <br>
+          <div class="row">
+            <div data-original-title="View results by sections" data-toggle="tooltip" title="">
+              <label class="col-md-offset-1 col-md-3">
+                Section:
               </label>
-              <div class="col-sm-10" data-original-title="Filter the results in the current view" data-toggle="tooltip" id="filter-box-parent-div" title="">
-                <div class="input-group">
-                  <input class="form-control" id="results-search-box" name="filtertext" onchange="updateResultsFilter()" placeholder="Type keywords from the question to filter" type="text">
-                  <a class="input-group-addon btn btn-default">
-                    <span class="glyphicon glyphicon-search">
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-offset-2 col-sm-10 col-md-offset-0 col-md-2 margin-bottom-15px">
-            <div data-original-title="Group results in the current view by team" data-toggle="tooltip" title="">
-              <div class="checkbox padding-top-0 min-height-0">
-                <label class="text-strike">
-                  <input id="frgroupbyteam" name="frgroupbyteam" type="checkbox">
-                  Group by Teams
-                </label>
-              </div>
-            </div>
-            <div data-original-title="Show statistics" data-toggle="tooltip" title="">
-              <div class="checkbox padding-top-0 min-height-0">
-                <label>
-                  <input id="show-stats-checkbox" name="frshowstats" onchange="updateStatsCheckBox();" type="checkbox">
-                  Show Statistics
-                </label>
-              </div>
-            </div>
-            <div data-original-title="Indicate missing responses" data-toggle="tooltip" title="">
-              <div class="checkbox padding-top-0 min-height-0">
-                <input id="indicate-missing-responses-checkbox" name="frindicatemissingresponses" onchange="this.form.submit()" type="checkbox" value="true">
-                Indicate Missing Responses
+              <div class="col-md-8">
+                All
               </div>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-sm-12 col-md-5" data-original-title="View results by sections" data-toggle="tooltip" title="">
-            <div class="form-group">
-              <label class="col-sm-2 control-label" for="sectionSelect">
-                Section:
-              </label>
-              <div class="col-sm-10">
-                <select class="form-control" id="sectionSelect" name="frgroupbysection" onchange="this.form.submit()">
-                  <option selected="" value="All">
-                    All
-                  </option>
-                  <option value="Section A">
-                    Section A
-                  </option>
-                  <option value="Section B">
-                    Section B
-                  </option>
-                  <option value="None">
-                    No specific recipient
-                  </option>
-                </select>
+        <div class="col-md-offset-4 pull-right col-md-3 margin-bottom-15px">
+          <label>
+            Additional settings:
+          </label>
+          <ul>
+            <li>
+              <div data-original-title="Group results in the current view by team" data-toggle="tooltip" title="">
+                <div class="text-strike">
+                  Group by Teams
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="col-sm-7 pull-right" style="padding-top:8px;">
-            <div class="pull-right" data-original-title="This button is disabled because this session contains more data than we can retrieve at one go. You can still expand one panel at a time by clicking on the panels below." data-toggle="tooltip" style="display:inline-block;" title="">
-              <a class="btn btn-default btn-xs pull-right" disabled="" id="collapse-panels-button" onclick="expandOrCollapsePanels(this)">
-                Collapse Questions
-              </a>
-            </div>
-          </div>
+            </li>
+            <li>
+              <div data-original-title="Show statistics" data-toggle="tooltip" title="">
+                <div class="text-strike">
+                  Show Statistics
+                </div>
+              </div>
+            </li>
+            <li>
+              <div data-original-title="Indicate missing responses" data-toggle="tooltip" title="">
+                <div class="text-strike">
+                  Indicate Missing Responses
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-offset-10 col-md-2">
+          <button class="btn btn-primary btn-block" data-target="#editModal" data-toggle="modal" id="editBtn" type="button">
+            Edit View
+          </button>
         </div>
       </div>
     </div>
-    <input name="fsname" type="hidden" value="First Session">
-    <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
-    <input name="user" type="hidden" value="CFResultsUiT.helper2">
-  </form>
+    <div class="modal fade" id="editModal" role="dialog">
+      <div class="modal-dialog">
+        <form action="/page/instructorFeedbackResultsPage?courseid=CFResultsUiT.CS2104&fsname=First+Session&user=CFResultsUiT.helper2" method="post">
+          <div class="modal-content">
+            <div class="modal-header alert-info">
+              <button class="close" data-dismiss="modal" type="button">
+                ×
+              </button>
+              <h4 class="modal-title">
+                Edit View
+              </h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-7">
+                  <div class="form-group">
+                    <label class="control-label" for="viewSelect">
+                      View:
+                    </label>
+                    <div data-original-title="View results in different formats" data-toggle="tooltip" title="">
+                      <select class="form-control" id="viewSelect" name="frsorttype">
+                        <option selected="" value="question">
+                          Group by - Question
+                        </option>
+                        <option value="giver-recipient-question">
+                          Group by - Giver &gt; Recipient &gt; Question
+                        </option>
+                        <option value="recipient-giver-question">
+                          Group by - Recipient &gt; Giver &gt; Question
+                        </option>
+                        <option value="giver-question-recipient">
+                          Group by - Giver &gt; Question &gt; Recipient
+                        </option>
+                        <option value="recipient-question-giver">
+                          Group by - Recipient &gt; Question &gt; Giver
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div data-original-title="View results by sections" data-toggle="tooltip" title="">
+                    <div class="form-group">
+                      <label class="control-label" for="sectionSelect">
+                        Section:
+                      </label>
+                      <select class="form-control" id="sectionSelect" name="frgroupbysection">
+                        <option selected="" value="All">
+                          All
+                        </option>
+                        <option value="Section A">
+                          Section A
+                        </option>
+                        <option value="Section B">
+                          Section B
+                        </option>
+                        <option value="None">
+                          No specific recipient
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <label class="control-label">
+                    Additional settings:
+                  </label>
+                  <div data-original-title="Group results in the current view by team" data-toggle="tooltip" title="">
+                    <div class="checkbox">
+                      <label class="text-strike">
+                        <input id="frgroupbyteam" name="frgroupbyteam" type="checkbox">
+                        Group by Teams
+                      </label>
+                    </div>
+                  </div>
+                  <div data-original-title="Show statistics" data-toggle="tooltip" title="">
+                    <div class="checkbox">
+                      <label>
+                        <input id="show-stats-checkbox" name="frshowstats" type="checkbox">
+                        Show Statistics
+                      </label>
+                    </div>
+                  </div>
+                  <div data-original-title="Indicate missing responses" data-toggle="tooltip" title="">
+                    <div class="checkbox">
+                      <input id="indicate-missing-responses-checkbox" name="frindicatemissingresponses" type="checkbox" value="true">
+                      Indicate Missing Responses
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <input name="fsname" type="hidden" value="First Session">
+              <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
+              <input name="user" type="hidden" value="CFResultsUiT.helper2">
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-default" data-dismiss="modal" type="button">
+                Cancel
+              </button>
+              <button class="btn btn-primary" id="submitBtn" type="submit">
+                Change View
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
   <br>
   <div id="statusMessagesToUser">
-    <div class="overflow-auto alert alert-warning statusMessage">
+    <div class="overflow-auto alert alert-warning icon-warning statusMessage">
       This session seems to have a large number of responses. It is recommended to view the results one question/section at a time. To view responses for a particular question, click on the question below. To view response for a particular section, choose the section from the drop-down box above.
     </div>
   </div>
   <script defer="" src="/js/statusMessage.js" type="text/javascript">
   </script>
+  <div>
+    <div class="pull-right" data-original-title="This button is disabled because this session contains more data than we can retrieve at one go. You can still expand one panel at a time by clicking on the panels below." data-toggle="tooltip" style="display:inline-block;" title="">
+      <a class="btn btn-default btn-xs pull-right" disabled="" id="collapse-panels-button">
+        Expand All Questions
+      </a>
+    </div>
+  </div>
   <br>
   <br>
   <div class="panel panel-info">
@@ -287,7 +353,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -307,27 +372,27 @@
           <table class="table fixed-table-layout table-striped table-bordered dataTable margin-0">
             <thead class="background-color-medium-gray text-color-gray font-weight-normal">
               <tr>
-                <th class="button-sort-none" id="button_sortFromTeam" onclick="toggleSort(this)" style="width: 10%; min-width: 67px;">
+                <th class="button-sort-none toggle-sort" id="button_sortFromTeam" style="width: 10%; min-width: 67px;">
                   Team
                   <span class="icon-sort unsorted">
                   </span>
                 </th>
-                <th class="button-sort-none" id="button_sortFromName" onclick="toggleSort(this)" style="width: 10%; min-width: 65px;">
+                <th class="button-sort-none toggle-sort" id="button_sortFromName" style="width: 10%; min-width: 65px;">
                   Giver
                   <span class="icon-sort unsorted">
                   </span>
                 </th>
-                <th class="button-sort-ascending" id="button_sortToTeam" onclick="toggleSort(this)" style="width: 10%; min-width: 67px;">
+                <th class="button-sort-ascending toggle-sort" id="button_sortToTeam" style="width: 10%; min-width: 67px;">
                   Team
                   <span class="icon-sort unsorted">
                   </span>
                 </th>
-                <th class="button-sort-none" id="button_sortToName" onclick="toggleSort(this)" style="width: 10%; min-width: 90px;">
+                <th class="button-sort-none toggle-sort" id="button_sortToName" style="width: 10%; min-width: 90px;">
                   Recipient
                   <span class="icon-sort unsorted">
                   </span>
                 </th>
-                <th class="button-sort-none" id="button_sortFeedback" onclick="toggleSort(this)" style="width: 45%; min-width: 95px;">
+                <th class="button-sort-none toggle-sort" id="button_sortFeedback" style="width: 45%; min-width: 95px;">
                   Feedback
                   <span class="icon-sort unsorted">
                   </span>
@@ -616,7 +681,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -627,7 +692,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -639,7 +703,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-2" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-2">
       <div class="panel-body padding-0" id="questionBody-1">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -663,7 +727,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -674,7 +738,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -686,7 +749,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-3" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-3">
       <div class="panel-body padding-0" id="questionBody-2">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -710,7 +773,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -721,7 +784,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -733,7 +795,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-4" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-4">
       <div class="panel-body padding-0" id="questionBody-3">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -757,7 +819,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -768,7 +830,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -780,7 +841,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-5" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-5">
       <div class="panel-body padding-0" id="questionBody-4">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -804,7 +865,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -815,7 +876,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -827,7 +887,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-6" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-6">
       <div class="panel-body padding-0" id="questionBody-5">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -851,7 +911,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -862,7 +922,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -897,7 +956,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-7" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-7">
       <div class="panel-body padding-0" id="questionBody-6">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -921,7 +980,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -932,7 +991,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -967,7 +1025,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-8" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-8">
       <div class="panel-body padding-0" id="questionBody-7">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -991,7 +1049,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -1002,7 +1060,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -1025,7 +1082,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-9" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-9">
       <div class="panel-body padding-0" id="questionBody-8">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -1049,7 +1106,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -1060,7 +1117,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -1083,7 +1139,7 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-10" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-10">
       <div class="panel-body padding-0" id="questionBody-9">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
@@ -1107,7 +1163,7 @@
         <input name="frgroupbysection" type="hidden" value="All">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       <form action="/page/instructorFeedbackResultsDownload" class="inline" method="post">
@@ -1118,7 +1174,6 @@
         <input name="fsname" type="hidden" value="First Session">
         <input name="courseid" type="hidden" value="CFResultsUiT.CS2104">
         <input name="sectionname" type="hidden" value="All">
-        <input id="filterTextForDownload" name="filtertext" type="hidden">
         <input id="statsShownCheckBox" name="frshowstats" type="hidden" value="">
         <input name="frindicatemissingresponses" type="hidden" value="false">
         <input name="questionid" type="hidden" value="${question.id}">
@@ -1130,13 +1185,43 @@
         </span>
       </div>
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-11" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-11">
       <div class="panel-body padding-0" id="questionBody-10">
         <div class="col-sm-12 no-response">
           <i class="text-muted">
             There are no responses for this question or you may not have the permission to see the response
           </i>
         </div>
+      </div>
+    </div>
+  </div>
+  <div aria-hidden="true" aria-labelledby="remindModal" class="modal fade" id="remindModal" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form action="/page/instructorFeedbackRemindParticularStudents?next=%2Fpage%2FinstructorFeedbackResultsPage%3Fuser%3DCFResultsUiT.helper2%26courseid%3DCFResultsUiT.CS2104%26fsname%3DFirst%2BSession&token=${sessionToken}" method="post" name="form_remind_list" role="form">
+          <div class="modal-header">
+            <button aria-hidden="true" class="close" data-dismiss="modal" type="button">
+              ×
+            </button>
+            <h4 class="modal-title">
+              Remind Particular Students
+              <small>
+                (Select the student(s) you want to remind)
+              </small>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group" id="studentList">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-default" data-dismiss="modal" type="button">
+              Cancel
+            </button>
+            <input class="btn btn-primary remind-particular-button" data-dismiss="modal" type="button" value="Remind">
+            <input name="user" type="hidden" value="CFResultsUiT.helper2">
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -1149,12 +1234,12 @@
         <input name="questionid" type="hidden" value="-1">
       </form>
       <div class="display-icon pull-right">
-        <span class="glyphicon pull-right glyphicon-chevron-up">
+        <span class="glyphicon glyphicon-chevron-down pull-right">
         </span>
       </div>
       Participants who have not responded to any question
     </div>
-    <div class="panel-collapse collapse in" id="panelBodyCollapse-12" style="height: auto;">
+    <div class="panel-collapse collapse" id="panelBodyCollapse-12">
     </div>
   </div>
 </div>

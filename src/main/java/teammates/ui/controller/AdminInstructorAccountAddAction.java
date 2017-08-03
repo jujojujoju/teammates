@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.attributes.CommentAttributes;
 import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.datatransfer.attributes.StudentAttributes;
@@ -26,7 +25,6 @@ import teammates.common.util.StatusMessage;
 import teammates.common.util.StatusMessageColor;
 import teammates.common.util.StringHelper;
 import teammates.common.util.Templates;
-import teammates.common.util.ThreadHelper;
 import teammates.common.util.Url;
 import teammates.logic.api.EmailGenerator;
 import teammates.logic.backdoor.BackDoorLogic;
@@ -41,38 +39,14 @@ public class AdminInstructorAccountAddAction extends Action {
 
         gateKeeper.verifyAdminPrivileges(account);
 
-        AdminHomePageData data = new AdminHomePageData(account);
+        AdminHomePageData data = new AdminHomePageData(account, sessionToken);
 
-        data.instructorDetailsSingleLine = getRequestParamValue(Const.ParamsNames.INSTRUCTOR_DETAILS_SINGLE_LINE);
-        data.instructorShortName = "";
-        data.instructorName = "";
-        data.instructorEmail = "";
-        data.instructorInstitution = "";
-        data.instructorAddingResultForAjax = true;
+        data.instructorShortName = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_SHORT_NAME).trim();
+        data.instructorName = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_NAME).trim();
+        data.instructorEmail = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_EMAIL).trim();
+        data.instructorInstitution = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_INSTITUTION).trim();
+        data.isInstructorAddingResultForAjax = true;
         data.statusForAjax = "";
-
-        // If there is input from the instructorDetailsSingleLine form,
-        // that data will be prioritized over the data from the 3-parameter form
-        if (data.instructorDetailsSingleLine == null) {
-            data.instructorShortName = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_SHORT_NAME);
-            data.instructorName = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_NAME);
-            data.instructorEmail = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_EMAIL);
-            data.instructorInstitution = getNonNullRequestParamValue(Const.ParamsNames.INSTRUCTOR_INSTITUTION);
-        } else {
-            try {
-                String[] instructorInfo = extractInstructorInfo(data.instructorDetailsSingleLine);
-
-                data.instructorShortName = instructorInfo[0];
-                data.instructorName = instructorInfo[0];
-                data.instructorEmail = instructorInfo[1];
-                data.instructorInstitution = instructorInfo[2];
-            } catch (InvalidParametersException e) {
-                data.statusForAjax = e.getMessage().replace(Const.EOL, Const.HTML_BR_TAG);
-                data.instructorAddingResultForAjax = false;
-                statusToUser.add(new StatusMessage(data.statusForAjax, StatusMessageColor.DANGER));
-                return createAjaxResult(data);
-            }
-        }
 
         data.instructorShortName = data.instructorShortName.trim();
         data.instructorName = data.instructorName.trim();
@@ -84,7 +58,7 @@ public class AdminInstructorAccountAddAction extends Action {
                                               data.instructorInstitution, data.instructorEmail);
         } catch (InvalidParametersException e) {
             data.statusForAjax = e.getMessage().replace(Const.EOL, Const.HTML_BR_TAG);
-            data.instructorAddingResultForAjax = false;
+            data.isInstructorAddingResultForAjax = false;
             statusToUser.add(new StatusMessage(data.statusForAjax, StatusMessageColor.DANGER));
             return createAjaxResult(data);
         }
@@ -100,6 +74,7 @@ public class AdminInstructorAccountAddAction extends Action {
             retryUrl = Url.addParamToUrl(retryUrl, Const.ParamsNames.INSTRUCTOR_NAME, data.instructorName);
             retryUrl = Url.addParamToUrl(retryUrl, Const.ParamsNames.INSTRUCTOR_EMAIL, data.instructorEmail);
             retryUrl = Url.addParamToUrl(retryUrl, Const.ParamsNames.INSTRUCTOR_INSTITUTION, data.instructorInstitution);
+            retryUrl = Url.addParamToUrl(retryUrl, Const.ParamsNames.SESSION_TOKEN, data.getSessionToken());
 
             StringBuilder errorMessage = new StringBuilder(100);
             String retryLink = "<a href=" + retryUrl + ">Exception in Importing Data, Retry</a>";
@@ -114,7 +89,7 @@ public class AdminInstructorAccountAddAction extends Action {
             statusToUser.add(new StatusMessage("<br>" + message, StatusMessageColor.DANGER));
             statusToAdmin = message;
 
-            data.instructorAddingResultForAjax = false;
+            data.isInstructorAddingResultForAjax = false;
             data.statusForAjax = errorMessage.toString();
             return createAjaxResult(data);
         }
@@ -147,22 +122,6 @@ public class AdminInstructorAccountAddAction extends Action {
     }
 
     /**
-     * Extracts instructor's info from a string then store them in an array of string.
-     * @param instructorDetails
-     *         This string is in the format INSTRUCTOR_NAME | INSTRUCTOR_EMAIL | INSTRUCTOR_INSTITUTION
-     *         or INSTRUCTOR_NAME \t INSTRUCTOR_EMAIL \t INSTRUCTOR_INSTITUTION
-     * @return A String array of size 3
-     */
-    private String[] extractInstructorInfo(String instructorDetails) throws InvalidParametersException {
-        String[] result = instructorDetails.trim().replace('|', '\t').split("\t");
-        if (result.length != Const.LENGTH_FOR_NAME_EMAIL_INSTITUTION) {
-            throw new InvalidParametersException(String.format(Const.StatusMessages.INSTRUCTOR_DETAILS_LENGTH_INVALID,
-                                                               Const.LENGTH_FOR_NAME_EMAIL_INSTITUTION));
-        }
-        return result;
-    }
-
-    /**
      * Imports Demo course to new instructor.
      * @param pageData data from AdminHomePageData
      * @return the ID of Demo course
@@ -191,23 +150,13 @@ public class AdminInstructorAccountAddAction extends Action {
         DataBundle data = JsonUtils.fromJson(jsonString, DataBundle.class);
 
         BackDoorLogic backDoorLogic = new BackDoorLogic();
+        backDoorLogic.persistDataBundle(data);
 
-        try {
-            backDoorLogic.persistDataBundle(data);
-        } catch (EntityDoesNotExistException e) {
-            ThreadHelper.waitFor(Config.PERSISTENCE_CHECK_DURATION);
-            backDoorLogic.persistDataBundle(data);
-            log.warning("Data Persistence was Checked Twice in This Request");
-        }
-
-        //produce searchable documents
-        List<CommentAttributes> comments = logic.getCommentsForGiver(courseId, pageData.instructorEmail);
         List<FeedbackResponseCommentAttributes> frComments =
                 logic.getFeedbackResponseCommentForGiver(courseId, pageData.instructorEmail);
         List<StudentAttributes> students = logic.getStudentsForCourse(courseId);
         List<InstructorAttributes> instructors = logic.getInstructorsForCourse(courseId);
 
-        logic.putCommentDocuments(comments);
         logic.putFeedbackResponseCommentDocuments(frComments);
         logic.putStudentDocuments(students);
         logic.putInstructorDocuments(instructors);

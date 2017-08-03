@@ -18,6 +18,7 @@ import teammates.common.exception.TeammatesException;
 import teammates.common.util.Assumption;
 import teammates.common.util.Const;
 import teammates.common.util.Logger;
+import teammates.common.util.SanitizationHelper;
 import teammates.common.util.StatusMessage;
 import teammates.common.util.StatusMessageColor;
 import teammates.ui.pagedata.PageData;
@@ -39,14 +40,14 @@ public class InstructorFeedbackQuestionEditAction extends Action {
                                     false, Const.ParamsNames.INSTRUCTOR_PERMISSION_MODIFY_SESSION);
 
         String editType = getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_EDITTYPE);
-        Assumption.assertNotNull("Null editType", editType);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_EDITTYPE, editType);
 
         FeedbackQuestionAttributes updatedQuestion = extractFeedbackQuestionData();
 
         try {
             if ("edit".equals(editType)) {
                 String questionText = getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_TEXT);
-                Assumption.assertNotNull("Null question text", questionText);
+                Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, questionText);
                 Assumption.assertNotEmpty("Empty question text", questionText);
 
                 editQuestion(updatedQuestion);
@@ -63,7 +64,7 @@ public class InstructorFeedbackQuestionEditAction extends Action {
             setStatusForException(e);
         }
 
-        return createRedirectResult(new PageData(account)
+        return createRedirectResult(new PageData(account, sessionToken)
                                             .getInstructorFeedbackEditLink(courseId, feedbackSessionName));
     }
 
@@ -86,7 +87,7 @@ public class InstructorFeedbackQuestionEditAction extends Action {
 
         FeedbackQuestionDetails updatedQuestionDetails = updatedQuestion.getQuestionDetails();
         List<String> questionDetailsErrors = updatedQuestionDetails.validateQuestionDetails();
-        List<StatusMessage> questionDetailsErrorsMessages = new ArrayList<StatusMessage>();
+        List<StatusMessage> questionDetailsErrorsMessages = new ArrayList<>();
 
         for (String error : questionDetailsErrors) {
             questionDetailsErrorsMessages.add(new StatusMessage(error, StatusMessageColor.DANGER));
@@ -102,7 +103,7 @@ public class InstructorFeedbackQuestionEditAction extends Action {
                           + updatedQuestion.courseId + "]</span> edited.<br>"
                           + "<span class=\"bold\">"
                           + updatedQuestionDetails.getQuestionTypeDisplayName() + ":</span> "
-                          + updatedQuestionDetails.getQuestionText();
+                          + SanitizationHelper.sanitizeForHtml(updatedQuestionDetails.getQuestionText());
         } else {
             statusToUser.addAll(questionDetailsErrorsMessages);
             isError = true;
@@ -145,13 +146,13 @@ public class InstructorFeedbackQuestionEditAction extends Action {
         FeedbackQuestionAttributes newQuestion = new FeedbackQuestionAttributes();
 
         newQuestion.setId(getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_ID));
-        Assumption.assertNotNull("Null question id", newQuestion.getId());
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_ID, newQuestion.getId());
 
         newQuestion.courseId = getRequestParamValue(Const.ParamsNames.COURSE_ID);
-        Assumption.assertNotNull("Null course id", newQuestion.courseId);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.COURSE_ID, newQuestion.courseId);
 
         newQuestion.feedbackSessionName = getRequestParamValue(Const.ParamsNames.FEEDBACK_SESSION_NAME);
-        Assumption.assertNotNull("Null feedback session name", newQuestion.feedbackSessionName);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_SESSION_NAME, newQuestion.feedbackSessionName);
 
         // TODO thoroughly investigate when and why these parameters can be null
         // and check all possibilities in the tests
@@ -180,7 +181,7 @@ public class InstructorFeedbackQuestionEditAction extends Action {
         }
 
         String questionNumber = getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_NUMBER);
-        Assumption.assertNotNull("Null question number", questionNumber);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_NUMBER, questionNumber);
         newQuestion.questionNumber = Integer.parseInt(questionNumber);
         Assumption.assertTrue("Invalid question number", newQuestion.questionNumber >= 1);
 
@@ -189,7 +190,7 @@ public class InstructorFeedbackQuestionEditAction extends Action {
 
         if (numberOfEntitiesIsUserDefined(newQuestion.recipientType, nEntityTypes)) {
             String nEntities = getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_NUMBEROFENTITIES);
-            Assumption.assertNotNull(nEntities);
+            Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_NUMBEROFENTITIES, nEntities);
             newQuestion.numberOfEntitiesToGiveFeedbackTo = Integer.parseInt(nEntities);
         } else {
             newQuestion.numberOfEntitiesToGiveFeedbackTo = Const.MAX_POSSIBLE_RECIPIENTS;
@@ -203,7 +204,7 @@ public class InstructorFeedbackQuestionEditAction extends Action {
                 getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_SHOWRECIPIENTTO));
 
         String questionType = getRequestParamValue(Const.ParamsNames.FEEDBACK_QUESTION_TYPE);
-        Assumption.assertNotNull(questionType);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, questionType);
         newQuestion.questionType = FeedbackQuestionType.valueOf(questionType);
 
         // Can be null

@@ -1,5 +1,3 @@
-@charset 'UTF-8';
-
 /*////////////////////////////////////////////////////////////
 /////////////////// Atomic Classes //////////////////////////
 //////////////////////////////////////////////////////////*/
@@ -126,7 +124,6 @@ Apply to alert to override Bootstrap's default 3d alerts
 
 .cursor-pointer {
     cursor: pointer;
-    cursor: hand;
 }
 
 .constSumOptionsLabel {
@@ -302,6 +299,10 @@ input.inline {
 
 .padding-left-7px {
     padding-left: 7px;
+}
+
+.margin-left-7px {
+    margin-left: 7px;
 }
 
 .margin-left-auto {
@@ -771,6 +772,13 @@ input.inline {
     color: #2aabd2;
 }
 
+/*
+Default to alert color for visibility titles used within an alert context.
+*/
+.alert .visibility-title {
+    color: inherit;
+}
+
 .filename-preview {
     border: 0;
     background-color: white;
@@ -922,6 +930,28 @@ input.inline {
     display: block;
     color: gray;
     content: attr(data-placeholder);
+}
+
+.remind-no-response {
+    display: inline-block;
+    padding-right: 5px;
+}
+
+/* features page */
+
+.img-responsive.features-page-img {
+    max-width: 75%;
+}
+
+@media screen and (min-width: 480px) {
+    .features-page-text {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+.features-page-text-bottom {
+    margin-top: 15px;
 }
 
 /*////////////////////////////////////////////////////////////
@@ -1154,9 +1184,11 @@ Prevent Long URL From Breaking Out of Container
 /*
 Glyphicon for success status messages
 */
-.alert-success:before {
+
+.icon-success:before {
     font-family: 'Glyphicons Halflings';
     display: inline-block;
-    padding-right: 2px;
+    padding-right: .5em;
     content: '\e084';
+    vertical-align: top;
 }

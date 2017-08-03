@@ -23,13 +23,13 @@ public class InstructorStudentRecordsAjaxPageAction extends Action {
     public ActionResult execute() throws EntityDoesNotExistException {
 
         String courseId = getRequestParamValue(Const.ParamsNames.COURSE_ID);
-        Assumption.assertNotNull(courseId);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.COURSE_ID, courseId);
 
         String studentEmail = getRequestParamValue(Const.ParamsNames.STUDENT_EMAIL);
-        Assumption.assertNotNull(studentEmail);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.STUDENT_EMAIL, studentEmail);
 
         String targetSessionName = getRequestParamValue(Const.ParamsNames.FEEDBACK_SESSION_NAME);
-        Assumption.assertNotNull(targetSessionName);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_SESSION_NAME, targetSessionName);
 
         InstructorAttributes instructor = logic.getInstructorForGoogleId(courseId, account.googleId);
 
@@ -47,11 +47,11 @@ public class InstructorStudentRecordsAjaxPageAction extends Action {
 
         filterFeedbackSessions(courseId, feedbacks, instructor, student);
 
-        List<SessionAttributes> sessions = new ArrayList<SessionAttributes>();
+        List<SessionAttributes> sessions = new ArrayList<>();
         sessions.addAll(feedbacks);
         Collections.sort(sessions, SessionAttributes.DESCENDING_ORDER);
 
-        List<FeedbackSessionResultsBundle> results = new ArrayList<FeedbackSessionResultsBundle>();
+        List<FeedbackSessionResultsBundle> results = new ArrayList<>();
         for (SessionAttributes session : sessions) {
             if (session instanceof FeedbackSessionAttributes) {
                 if (!targetSessionName.isEmpty() && targetSessionName.equals(session.getSessionName())) {
@@ -69,7 +69,7 @@ public class InstructorStudentRecordsAjaxPageAction extends Action {
                       + "in course <span class=\"bold\">[" + courseId + "]</span>";
 
         InstructorStudentRecordsAjaxPageData data =
-                                        new InstructorStudentRecordsAjaxPageData(account, student, results);
+                                        new InstructorStudentRecordsAjaxPageData(account, student, sessionToken, results);
 
         return createShowPageResult(Const.ViewURIs.INSTRUCTOR_STUDENT_RECORDS_AJAX, data);
     }

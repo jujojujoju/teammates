@@ -43,9 +43,9 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
     protected FeedbackSubmissionEditPageData data;
     protected boolean hasValidResponse;
     protected boolean isSendSubmissionEmail;
-    protected List<FeedbackResponseAttributes> responsesToSave = new ArrayList<FeedbackResponseAttributes>();
-    protected List<FeedbackResponseAttributes> responsesToDelete = new ArrayList<FeedbackResponseAttributes>();
-    protected List<FeedbackResponseAttributes> responsesToUpdate = new ArrayList<FeedbackResponseAttributes>();
+    protected List<FeedbackResponseAttributes> responsesToSave = new ArrayList<>();
+    protected List<FeedbackResponseAttributes> responsesToDelete = new ArrayList<>();
+    protected List<FeedbackResponseAttributes> responsesToUpdate = new ArrayList<>();
 
     @Override
     protected ActionResult execute() throws EntityDoesNotExistException {
@@ -55,11 +55,11 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
         Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_SESSION_NAME, feedbackSessionName);
 
         setAdditionalParameters();
-        verifyAccesibleForSpecificUser();
+        verifyAccessibleForSpecificUser();
 
         String userEmailForCourse = getUserEmailForCourse();
 
-        data = new FeedbackSubmissionEditPageData(account, student);
+        data = new FeedbackSubmissionEditPageData(account, student, sessionToken);
         data.bundle = getDataBundle(userEmailForCourse);
         Assumption.assertNotNull("Feedback session " + feedbackSessionName
                                  + " does not exist in " + courseId + ".", data.bundle);
@@ -88,7 +88,7 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
                 continue; // question has been skipped (not displayed).
             }
 
-            List<FeedbackResponseAttributes> responsesForQuestion = new ArrayList<FeedbackResponseAttributes>();
+            List<FeedbackResponseAttributes> responsesForQuestion = new ArrayList<>();
             String questionId = getRequestParamValue(
                     Const.ParamsNames.FEEDBACK_QUESTION_ID + "-" + questionIndx);
             FeedbackQuestionAttributes questionAttributes = data.bundle.getQuestionAttributes(questionId);
@@ -111,8 +111,8 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
             emailSet.add("");
             emailSet = SanitizationHelper.desanitizeFromHtml(emailSet);
 
-            ArrayList<String> responsesRecipients = new ArrayList<String>();
-            List<String> errors = new ArrayList<String>();
+            ArrayList<String> responsesRecipients = new ArrayList<>();
+            List<String> errors = new ArrayList<>();
 
             for (int responseIndx = 0; responseIndx < numOfResponsesToGet; responseIndx++) {
                 FeedbackResponseAttributes response =
@@ -161,7 +161,7 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
                     addToPendingResponses(response);
                 }
             } else {
-                List<StatusMessage> errorMessages = new ArrayList<StatusMessage>();
+                List<StatusMessage> errorMessages = new ArrayList<>();
 
                 for (String error : errors) {
                     errorMessages.add(new StatusMessage(error, StatusMessageColor.DANGER));
@@ -241,7 +241,7 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
         }
 
         List<FeedbackResponseAttributes> existingResponses = data.bundle.questionResponseBundle.get(question);
-        List<String> existingResponsesId = new ArrayList<String>();
+        List<String> existingResponsesId = new ArrayList<>();
         for (FeedbackResponseAttributes existingResponse : existingResponses) {
             existingResponsesId.add(existingResponse.getId());
         }
@@ -305,24 +305,27 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
                 Const.ParamsNames.FEEDBACK_RESPONSE_ID + "-" + questionIndx + "-" + responseIndx));
 
         response.feedbackSessionName = getRequestParamValue(Const.ParamsNames.FEEDBACK_SESSION_NAME);
-        Assumption.assertNotNull("Null feedback session name", response.feedbackSessionName);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_SESSION_NAME, response.feedbackSessionName);
 
         response.courseId = getRequestParamValue(Const.ParamsNames.COURSE_ID);
-        Assumption.assertNotNull("Null feedback courseId", response.courseId);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.COURSE_ID, response.courseId);
 
         response.feedbackQuestionId = getRequestParamValue(
                 Const.ParamsNames.FEEDBACK_QUESTION_ID + "-" + questionIndx);
-        Assumption.assertNotNull("Null feedbackQuestionId", response.feedbackQuestionId);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_ID + "-" + questionIndx,
+                response.feedbackQuestionId);
         Assumption.assertEquals("feedbackQuestionId Mismatch", feedbackQuestionAttributes.getId(),
                                 response.feedbackQuestionId);
 
         response.recipient = getRequestParamValue(
                 Const.ParamsNames.FEEDBACK_RESPONSE_RECIPIENT + "-" + questionIndx + "-" + responseIndx);
-        Assumption.assertNotNull("Null feedback recipientEmail", response.recipient);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_RESPONSE_RECIPIENT + "-" + questionIndx + "-"
+                + responseIndx, response.recipient);
 
         String feedbackQuestionType = getRequestParamValue(
                 Const.ParamsNames.FEEDBACK_QUESTION_TYPE + "-" + questionIndx);
-        Assumption.assertNotNull("Null feedbackQuestionType", feedbackQuestionType);
+        Assumption.assertPostParamNotNull(Const.ParamsNames.FEEDBACK_QUESTION_TYPE + "-" + questionIndx,
+                feedbackQuestionType);
         response.feedbackQuestionType = FeedbackQuestionType.valueOf(feedbackQuestionType);
 
         FeedbackParticipantType recipientType = feedbackQuestionAttributes.recipientType;
@@ -389,7 +392,7 @@ public abstract class FeedbackSubmissionEditSaveAction extends Action {
 
     protected abstract void removeRespondent();
 
-    protected abstract void verifyAccesibleForSpecificUser();
+    protected abstract void verifyAccessibleForSpecificUser();
 
     protected abstract String getUserEmailForCourse();
 

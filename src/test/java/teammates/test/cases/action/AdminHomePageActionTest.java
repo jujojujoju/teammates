@@ -18,11 +18,6 @@ public class AdminHomePageActionTest extends BaseActionTest {
     }
 
     @Override
-    protected void prepareTestData() {
-        // no test data used in this test
-    }
-
-    @Override
     @Test
     public void testExecuteAndPostProcess() {
 
@@ -34,7 +29,6 @@ public class AdminHomePageActionTest extends BaseActionTest {
         final ShowPageResult result = getShowPageResult(a);
         assertEquals(Const.ViewURIs.ADMIN_HOME, result.destination);
         final AdminHomePageData startingPageData = (AdminHomePageData) result.data;
-        assertEquals("", startingPageData.instructorDetailsSingleLine);
         assertEquals("", startingPageData.instructorEmail);
         assertEquals("", startingPageData.instructorShortName);
         assertEquals("", startingPageData.instructorInstitution);
@@ -46,6 +40,13 @@ public class AdminHomePageActionTest extends BaseActionTest {
     @Override
     protected AdminHomePageAction getAction(String... params) {
         return (AdminHomePageAction) gaeSimulation.getActionObject(getActionUri(), params);
+    }
+
+    @Override
+    @Test
+    protected void testAccessControl() throws Exception {
+        String[] submissionParams = new String[]{};
+        verifyOnlyAdminsCanAccess(submissionParams);
     }
 
 }

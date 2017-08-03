@@ -20,7 +20,7 @@ import teammates.common.util.SanitizationHelper;
 import teammates.common.util.TimeHelper;
 import teammates.storage.entity.FeedbackSession;
 
-public class FeedbackSessionAttributes extends EntityAttributes implements SessionAttributes {
+public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession> implements SessionAttributes {
     private String feedbackSessionName;
     private String courseId;
     private String creatorEmail;
@@ -47,8 +47,8 @@ public class FeedbackSessionAttributes extends EntityAttributes implements Sessi
         this.isOpeningEmailEnabled = true;
         this.isClosingEmailEnabled = true;
         this.isPublishedEmailEnabled = true;
-        this.respondingInstructorList = new HashSet<String>();
-        this.respondingStudentList = new HashSet<String>();
+        this.respondingInstructorList = new HashSet<>();
+        this.respondingStudentList = new HashSet<>();
     }
 
     public FeedbackSessionAttributes(FeedbackSession fs) {
@@ -148,11 +148,19 @@ public class FeedbackSessionAttributes extends EntityAttributes implements Sessi
     }
 
     public String getStartTimeString() {
-        return TimeHelper.formatTime12H(startTime);
+        if (startTime == null) {
+            return "-";
+        }
+        Date startTimeInUtc = TimeHelper.convertLocalDateToUtc(startTime, timeZone);
+        return TimeHelper.formatDateTimeForSessions(startTimeInUtc, timeZone);
     }
 
     public String getEndTimeString() {
-        return TimeHelper.formatTime12H(endTime);
+        if (endTime == null) {
+            return "-";
+        }
+        Date endTimeInUtc = TimeHelper.convertLocalDateToUtc(endTime, timeZone);
+        return TimeHelper.formatDateTimeForSessions(endTimeInUtc, timeZone);
     }
 
     public String getInstructionsString() {
@@ -192,7 +200,7 @@ public class FeedbackSessionAttributes extends EntityAttributes implements Sessi
     @Override
     public List<String> getInvalidityInfo() {
         FieldValidator validator = new FieldValidator();
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
 
         // Check for null fields.
 
@@ -683,5 +691,10 @@ public class FeedbackSessionAttributes extends EntityAttributes implements Sessi
 
     public void setRespondingStudentList(Set<String> respondingStudentList) {
         this.respondingStudentList = respondingStudentList;
+    }
+
+    public String getEndTimeInIso8601Format() {
+        Date endTimeInUtc = TimeHelper.convertLocalDateToUtc(endTime, timeZone);
+        return TimeHelper.formatDateToIso8601Utc(endTimeInUtc);
     }
 }
